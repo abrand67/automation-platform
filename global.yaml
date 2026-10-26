@@ -1,0 +1,5 @@
+---
+# Shared variables evaluated across templates during runtime compilation loops
+ntp_server: "10.255.254.254"
+dns_primary: "1.1.1.1"
+snmp_community: "FluxaraAutomationRO"
