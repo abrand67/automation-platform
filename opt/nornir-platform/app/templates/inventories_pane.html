@@ -1,0 +1,50 @@
+<!-- file: /opt/nornir-platform/app/templates/inventories_pane.html -->
+<section id="main-content-viewport" style="margin-top: 2rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h2 style="color: var(--emerald-green); font-size: 1.25rem; font-weight: bold; margin: 0;">
+            Dynamic Inventories // NetBox Source of Truth
+        </h2>
+        <button hx-get="/inventories" hx-target="#main-content-viewport" hx-swap="outerHTML" class="btn-submit" style="background-color: #1e293b;">
+            Refresh Status
+        </button>
+    </div>
+
+    <!-- Active Inventory Summary Groups -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+        <div style="background-color: #000; border: 1px solid var(--border-color); padding: 1rem; border-radius: 4px;">
+            <div style="font-family: monospace; font-size: 0.7rem; color: var(--text-muted);">ACTIVE POLLING CLUSTERS</div>
+            <div style="font-size: 1.5rem; font-weight: bold; margin-top: 0.25rem; color: var(--text-main);">48 OSD Nodes</div>
+        </div>
+        <div style="background-color: #000; border: 1px solid var(--border-color); padding: 1rem; border-radius: 4px;">
+            <div style="font-family: monospace; font-size: 0.7rem; color: var(--text-muted);">INVENTORY STATUS</div>
+            <div style="font-size: 1.5rem; font-weight: bold; margin-top: 0.25rem; color: var(--emerald-green);">SYNCHRONIZED</div>
+        </div>
+    </div>
+
+    <!-- Inventory Site Slices Table -->
+    <table>
+        <thead>
+            <tr>
+                <th>Site Target Identifier</th>
+                <th>Source Region</th>
+                <th>Transport Mode Default</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td style="font-weight: 600; color: var(--text-main);">dfw</td>
+                <td>Dallas-Fort Worth Metro</td>
+                <td style="font-family: monospace; color: var(--emerald-green);">SSH (Port 22)</td>
+                <td><span style="color: var(--emerald-green);">● Active</span></td>
+            </tr>
+            <tr>
+                <td style="font-weight: 600; color: var(--text-main);">aus</td>
+                <td>Austin Datacenter</td>
+                <td style="font-family: monospace; color: var(--emerald-green);">SSH (Port 22)</td>
+                <td><span style="color: var(--emerald-green);">● Active</span></td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+

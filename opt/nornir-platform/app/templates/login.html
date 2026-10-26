@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Nornir Platform - Login Auth Gateway</title>
+    <!-- Links directly to your existing local, air-gapped styling engine rules -->
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        /* Specific layout rules to center the login container perfectly on screen */
+        .login-viewport {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 80vh;
+        }
+        .login-card {
+            width: 100%;
+            max-width: 400px;
+            background-color: var(--bg-black);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 2.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+        }
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+        .error-banner {
+            display: none;
+            background-color: rgba(244, 63, 94, 0.1);
+            border: 1px solid var(--rose-red);
+            color: var(--rose-red);
+            font-family: monospace;
+            font-size: 0.75rem;
+            padding: 0.75rem;
+            border-radius: 4px;
+            margin-bottom: 1.25rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-viewport">
+        <div class="login-card">
+            
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <h1 style="color: var(--emerald-green); font-size: 1.25rem; font-weight: bold; font-family: monospace; margin: 0;">
+                    // SECURITY AUTH GATEWAY
+                </h1>
+                <p style="color: var(--text-muted); font-size: 0.75rem; margin-top: 0.25rem;">
+                    Nornir Enterprise Network Automation Engine
+                </p>
+            </div>
+
+            <!-- Interceptor Validation Banner -->
+            <div id="auth-error" class="error-banner"></div>
+
+            <!-- Native Native HTML5 Login Action Elements -->
+            <form id="login-form">
+                <div class="form-group input-group">
+                    <label>ENTERPRISE USERNAME</label>
+                    <input type="text" id="username" name="username" required autofocus class="input-control" placeholder="e.g. net_admin">
+                </div>
+                
+                <div class="form-group input-group">
+                    <label>DIRECTORY PASSWORD</label>
+                    <input type="password" id="password" name="password" required class="input-control" placeholder="••••••••••••">
+                </div>
+
+                <div style="margin-top: 2rem;">
+                    <button type="submit" id="submit-btn" class="btn-submit" style="width: 100%; height: 40px; font-size: 0.85rem; tracking-letter: 0.05em;">
+                        Authenticate Verification Clearance
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("login-form").addEventListener("submit", async function(event) {
+            // Prevent the native browser page reload behavior 
+            event.preventDefault();
+            
+            const errBanner = document.getElementById("auth-error");
+            const btn = document.getElementById("submit-btn");
+            
+            errBanner.style.display = "none";
+            btn.innerText = "Verifying Clearances...";
+            btn.disabled = true;
+
+            // 1. Build an OAuth2 compliant url-encoded form body payload mapping
+            const formData = new URLSearchParams();
+            formData.append("username", document.getElementById("username").value);
+            formData.append("password", document.getElementById("password").value);
+
+            try {
+                // 2. Transmit credentials directly to your centralized auth provider routes
+                const response = await fetch("/api/v1/auth/token", {
+                    method: "POST",
+                    headers: { "Content-Type: application/x-www-form-urlencoded" },
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.detail || "Access challenge rejected by directory servers.");
+                }
+
+                // 3. CAPTURE & SECURE: Store token inside local browser profile tracking configurations
+                localStorage.setItem("nornir_access_token", data.access_token);
+                
+                // 4. Clean handoff redirect to the platform systems template (Default to dynamic landing index)
+                window.location.href = "/scheduler";
+
+            } catch (error) {
+                // Handle credential failures or system connectivity errors cleanly
+                errBanner.innerText = `[CRITICAL] Auth Failed: ${error.message}`;
+                errBanner.style.display = "block";
+                btn.innerText = "Authenticate Verification Clearance";
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
+

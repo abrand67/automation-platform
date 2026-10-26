@@ -1,0 +1,64 @@
+<section id="scheduler-interface" style="margin-top: 2rem;">
+    <h2 style="color: var(--emerald-green); font-size: 1.25rem; font-weight: bold; margin-top: 0; margin-bottom: 1.5rem;">
+        Recurring Automation Schedules
+    </h2>
+    
+    <form hx-post="/scheduler/add" hx-target="#scheduler-interface" hx-swap="outerHTML" class="scheduler-form-grid">
+        <div class="input-group">
+            <label>SCHEDULE NAME</label>
+            <input type="text" name="name" placeholder="Daily Configuration Backup" required class="input-control">
+        </div>
+        <div class="input-group">
+            <label>CRON EXPRESSION</label>
+            <input type="text" name="cron_expr" placeholder="0 2 * * *" required class="input-control" style="font-family: monospace;">
+        </div>
+        <div class="input-group">
+            <label>NORNIR AUTOMATION TASK</label>
+            <select name="job_type" class="input-control" style="height: 38px;">
+                <option value="backup_configs">Backup Switch Configs</option>
+                <option value="verify_ospf">Verify OSPF Neighbors</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label>TARGET NETBOX SITE</label>
+            <input type="text" name="site_filter" placeholder="dfw" required class="input-control">
+        </div>
+        <div style="grid-column: 1 / -1; display: flex; justify-content: flex-end; margin-top: 0.5rem;">
+            <button type="submit" class="btn-submit">Save Routine Schedule</button>
+        </div>
+    </form>
+
+    <div style="overflow-x: auto; margin-top: 1rem;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Schedule ID</th>
+                    <th>Next Scheduled Execution</th>
+                    <th style="text-align: right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if schedules %}
+                    {% for sched in schedules %}
+                    <tr>
+                        <td style="font-weight: 600; color: var(--text-main);">{{ sched.id }}</td>
+                        <td style="color: var(--amber-orange);">{{ sched.next_fire_time if sched.next_fire_time else 'Paused / Idle' }}</td>
+                        <td style="text-align: right;">
+                            <button hx-delete="/scheduler/delete/{{ sched.id }}" hx-target="#scheduler-interface" hx-swap="outerHTML" class="btn-delete">
+                                [Delete]
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                <tr>
+                    <td colspan="3" style="text-align: center; color: #475569; padding: 2rem; font-style: italic;">
+                        No active routine automated timers detected in database storage.
+                    </td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
