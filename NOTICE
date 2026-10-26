@@ -1,0 +1,35 @@
+Fluxara Enterprise Network Automation Engine
+Copyright 2026 Allan Brand
+
+This product includes software developed by Allan Brand and contributors.
+
+This product bundles, embeds, or programmatically interfaces with the following 
+open-source components in accordance with their respective licenses:
+
+* Nornir Execution Framework
+  Copyright (c) 2018 David Barroso
+  Licensed under the Apache License 2.0
+
+* hvac (HashiCorp Vault API Client for Python)
+  Copyright (c) 2015-2026 Ian Unruh and contributors
+  Licensed under the Apache License 2.0
+
+* Netmiko Connection Library
+  Copyright (c) 2014 Kirk Byers
+  Licensed under the MIT License
+
+* FastAPI Web Framework
+  Copyright (c) 2018 Sebastián Ramírez
+  Licensed under the MIT License
+
+* HTMX Script Engine
+  Copyright (c) 2020 Carson Gross
+  Licensed under the BSD 2-Clause License
+
+* SQLAlchemy Core/ORM
+  Copyright (c) 2005-2026 SQLAlchemy Authors
+  Licensed under the MIT License
+
+* Advanced Python Scheduler (APScheduler)
+  Copyright (c) Alex Grönholm
+  Licensed under the MIT License
