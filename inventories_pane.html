@@ -1,0 +1,29 @@
+<section id="main-content-viewport" style="margin-top: 2rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h2 style="color: var(--emerald-green); font-size: 1.25rem; font-weight: bold; margin: 0;">Dynamic Inventories // NetBox Source of Truth</h2>
+        <button hx-get="/inventories" hx-target="#main-content-viewport" hx-swap="outerHTML" class="btn-submit" style="background-color: #1e293b;">Refresh Status</button>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+        <div style="background-color: #000; border: 1px solid var(--border-color); padding: 1rem; border-radius: 4px;"><div style="font-family: monospace; font-size: 0.7rem; color: var(--text-muted);">ACTIVE POLLING CLUSTERS</div><div style="font-size: 1.5rem; font-weight: bold; margin-top: 0.25rem; color: var(--text-main);">48 OSD Nodes</div></div>
+        <div style="background-color: #000; border: 1px solid var(--border-color); padding: 1rem; border-radius: 4px;"><div style="font-family: monospace; font-size: 0.7rem; color: var(--text-muted);">INVENTORY STATUS</div><div style="font-size: 1.5rem; font-weight: bold; margin-top: 0.25rem; color: var(--emerald-green);">SYNCHRONIZED</div></div>
+    </div>
+    <table style="width: 100%; border-collapse: collapse;">
+        <thead><tr><th>Site Target</th><th>Source Region</th><th>Transport Mode</th><th style="text-align: right;">Inventory Control</th></tr></thead>
+        <tbody>
+            <tr style="border-bottom: 1px solid #1e293b;">
+                <td style="font-weight: 600; color: var(--text-main); padding: 1rem 0.75rem;">dfw</td>
+                <td style="padding: 1rem 0.75rem;">Dallas-Fort Worth Metro</td>
+                <td style="font-family: monospace; color: var(--emerald-green); padding: 1rem 0.75rem;">SSH (Port 22)</td>
+                <td style="text-align: right; padding: 1rem 0.75rem;"><button class="btn-submit" style="background-color: #334155;" hx-get="/inventories/dfw/devices" hx-target="#devices-target-dfw" hx-trigger="click once" onclick="var t = document.getElementById('devices-row-dfw'); t.style.display = (t.style.display === 'none') ? 'table-row' : 'none';">Inspect Fleet</button></td>
+            </tr>
+            <tr id="devices-row-dfw" style="display: none; background-color: rgba(0,0,0,0.15); border-bottom: 1px solid #1e293b;"><td colspan="4" style="padding: 1rem 1.5rem;"><div style="font-family: monospace; font-size: 0.7rem; color: var(--text-muted); margin-bottom: 0.5rem; font-weight: 600;">// NETBOX LIVE HARDWARE POOL (DFW SHARD)</div><div id="devices-target-dfw"><div style="color: var(--text-muted); font-size: 0.75rem; font-style: italic;">Querying live datacenter records...</div></div></td></tr>
+            <tr style="border-bottom: 1px solid #1e293b;">
+                <td style="font-weight: 600; color: var(--text-main); padding: 1rem 0.75rem;">aus</td>
+                <td style="padding: 1rem 0.75rem;">Austin Datacenter</td>
+                <td style="font-family: monospace; color: var(--emerald-green); padding: 1rem 0.75rem;">SSH (Port 22)</td>
+                <td style="text-align: right; padding: 1rem 0.75rem;"><button class="btn-submit" style="background-color: #334155;" hx-get="/inventories/aus/devices" hx-target="#devices-target-aus" hx-trigger="click once" onclick="var t = document.getElementById('devices-row-aus'); t.style.display = (t.style.display === 'none') ? 'table-row' : 'none';">Inspect Fleet</button></td>
+            </tr>
+            <tr id="devices-row-aus" style="display: none; background-color: rgba(0,0,0,0.15); border-bottom: 1px solid #1e293b;"><td colspan="4" style="padding: 1rem 1.5rem;"><div style="font-family: monospace; font-size: 0.7rem; color: var(--text-muted); margin-bottom: 0.5rem; font-weight: 600;">// NETBOX LIVE HARDWARE POOL (AUS SHARD)</div><div id="devices-target-aus"><div style="color: var(--text-muted); font-size: 0.75rem; font-style: italic;">Querying live datacenter records...</div></div></td></tr>
+        </tbody>
+    </table>
+</section>
