@@ -1,0 +1,18 @@
+[Unit]
+Description=NGINX Unit Application Server - Fluxara FastAPI Gateway
+After=network.target percona-postgresql.service valkey.service
+Wants=percona-postgresql.service valkey.service
+
+[Service]
+Type=forking
+# Loads the shared centralized environment file variables into memory
+EnvironmentFile=/opt/Fluxara/app/.env
+ExecStart=/usr/sbin/unitd --control unix:/var/run/control.unit.sock
+ExecStartPost=/usr/bin/curl -X PUT --data-binary @/opt/Fluxara/unit-config.json --unix-socket /var/run/control.unit.sock http://localhost/config
+ExecReload=/usr/bin/curl -X PUT --data-binary @/opt/Fluxara/unit-config.json --unix-socket /var/run/control.unit.sock http://localhost/config
+KillMode=process
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
