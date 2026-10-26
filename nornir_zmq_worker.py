@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv()  # Ingest environment profile mappings into system memory immediately on boot
 
 import os
 import sys
@@ -24,8 +24,13 @@ import zmq
 import zmq.asyncio
 from redis import Redis
 from nornir import InitNornir
-from nornir_netbox.plugins.inventory import NetboxInventory2
-from nornir_netmiko.tasks import netmiko_send_command, netmiko_send_config
+
+# Conditional safety load for backend Nornir inventory plugin tools
+try:
+    from nornir_netbox.plugins.inventory import NetboxInventory2
+except ImportError:
+    pass
+
 from tasks import archive_job_run
 
 VALKEY_HOST = os.getenv("VALKEY_HOST", "127.0.0.1")
@@ -39,71 +44,98 @@ def stream_log(job_id: str, message: str, persistent_log_list: list):
 def get_vault_credentials(secret_path: str, job_id: str, log_list: list) -> dict:
     client = hvac.Client(url=os.getenv("VAULT_ADDR", "http://127.0.0.1:8200"))
     client.token = os.getenv("VAULT_TOKEN")
-    if not client.is_authenticated(): raise Exception("Vault authentication failed.")
+    if not client.is_authenticated(): 
+        raise Exception("Vault authentication failed.")
     read_response = client.secrets.kv.v2.read_secret_version(path=secret_path)
     return read_response['data']['data']
 
 def execute_nornir_task(task_name: str, netbox_filters: dict, extra_vars: dict, job_id: str, project_id: str):
     historical_raw_logs = []
-    stream_log(job_id, f"[Shard Engine] Task initialization engaged for project: {project_id}", historical_raw_logs)
+    stream_log(job_id, f"[Fluxara Engine] Task initialization engaged for project path tracking: {project_id}", historical_raw_logs)
     
-    workspace_path = f"/opt/Fluxara/workspaces/project_{project_id}" if project_id != "global" else None
-    if workspace_path and os.path.exists(workspace_path):
+    # Direct path routing targeting your explicit 'Fluxara' GitLab workspace root
+    workspace_path = "/opt/Fluxara/workspaces/Fluxara"
+    
+    if os.path.exists(workspace_path):
+        stream_log(job_id, f"[Source Control] Directing runtime modules search query path to: {workspace_path}", historical_raw_logs)
         sys.path.insert(0, workspace_path)
 
     try:
+        # Dynamically load your multi-vendor execution engine checked out of GitLab
+        from main_orchestrator import run_multi_vendor_deployment
+    except ImportError as ie:
+        stream_log(job_id, f"CRITICAL: Failed to import main_orchestrator.py from GitLab directory: {str(ie)}", historical_raw_logs)
+        if workspace_path in sys.path: 
+            sys.path.remove(workspace_path)
+        return
+
+    try:
+        # Initialize dynamic NetBox inventory parameters securely from system environment profiles
         nr = InitNornir(
             runner={"plugin": "threaded", "options": {"num_workers": 25}},
-            inventory={"plugin": "NetboxInventory2", "options": {"nb_url": os.getenv("NETBOX_URL"), "nb_token": os.getenv("NETBOX_TOKEN"), "ssl_verify": True, "filter_parameters": netbox_filters}}
+            inventory={
+                "plugin": "NetboxInventory2", 
+                "options": {
+                    "nb_url": os.getenv("NETBOX_URL"), 
+                    "nb_token": os.getenv("NETBOX_TOKEN"), 
+                    "ssl_verify": True, 
+                    "filter_parameters": netbox_filters
+                }
+            }
         )
     except Exception as e:
-        stream_log(job_id, f"CRITICAL: Inventory load failure: {str(e)}", historical_raw_logs)
+        stream_log(job_id, f"CRITICAL: NetBox Inventory load failure: {str(e)}", historical_raw_logs)
+        if workspace_path in sys.path: 
+            sys.path.remove(workspace_path)
         return
 
     if not nr.inventory.hosts:
         stream_log(job_id, "WARNING: No hosts resolved for given NetBox criteria filters.", historical_raw_logs)
+        if workspace_path in sys.path: 
+            sys.path.remove(workspace_path)
         return
 
-    try: credentials = get_vault_credentials("network/credentials", job_id, historical_raw_logs)
-    except Exception: return
+    # Invoke your custom multi-vendor execution script compiled inside GitLab
+    try:
+        results = nr.run(
+            task=run_multi_vendor_deployment,
+            name=task_name,
+            extra_vars=extra_vars,
+            job_id=job_id,
+            stream_callback=lambda host, msg: stream_log(job_id, f"[{host}] {msg}", historical_raw_logs)
+        )
+    except Exception as run_err:
+        stream_log(job_id, f"CRITICAL: Execution failure inside Nornir run loop: {str(run_err)}", historical_raw_logs)
+        results = None
 
-    def netmiko_execution_engine(task):
-        platform_mapping = {"arista-eos": "arista_eos", "cisco-ios-xe": "cisco_ios", "juniper-junos": "juniper_junos"}
-        task.host.connection_options["netmiko"] = {
-            "platform": platform_mapping.get(task.host.platform, "cisco_ios"),
-            "extras": {"username": credentials.get("username"), "password": credentials.get("password"), "secret": credentials.get("enable_secret", ""), "ssh_strict": False, "fast_cli": True}
-        }
-        commands, configs, output_log = extra_vars.get("commands", []), extra_vars.get("configs", []), []
-        if commands:
-            for cmd in commands:
-                res = task.run(task=netmiko_send_command, command_string=cmd)
-                output_log.append(f"Command:\n{res.result}")
-        elif configs:
-            res = task.run(task=netmiko_send_config, config_commands=configs)
-            output_log.append(f"Config Modified:\n{res.result}")
-        return "\n".join(output_log)
+    # Clean up environmental thread modules searching paths post-execution
+    if workspace_path in sys.path: 
+        sys.path.remove(workspace_path)
 
-    results = nr.run(task=netmiko_execution_engine, name=task_name)
-
-    for host, host_result in results.items():
-        if host_result.failed: stream_log(job_id, f"[{host}] ❌ EXECUTION PATH FAILURE:\n{host_result.exception}", historical_raw_logs)
-        else: stream_log(job_id, f"[{host}] ✅ EXECUTION COMPLETED CLEANLY", historical_raw_logs)
-
-    if workspace_path and workspace_path in sys.path: sys.path.remove(workspace_path)
-    stream_log(job_id, "Archiving logging matrices data to PostgreSQL...", historical_raw_logs)
-    asyncio.run(archive_job_run(job_id, results, historical_raw_logs))
+    if results:
+        stream_log(job_id, "Archiving logging matrices data metrics to PostgreSQL...", historical_raw_logs)
+        asyncio.run(archive_job_run(job_id, results, historical_raw_logs))
 
 async def start_worker_loop(shard_endpoint: str):
     ctx = zmq.asyncio.Context()
     socket = ctx.socket(zmq.PULL)
     socket.connect(shard_endpoint)
-    print(f"[System] Worker sharded loop process bound to target channel: {shard_endpoint}", flush=True)
+    print(f"[System] Fluxara worker sharded loop process bound to target channel: {shard_endpoint}", flush=True)
+    
     while True:
         job_payload = await socket.recv_json()
         await asyncio.to_thread(
-            execute_nornir_task, job_payload.get("task"), job_payload.get("netbox_filters", {}), job_payload.get("extra_vars", {}), job_payload.get("job_id"), job_payload.get("project_id", "global")
+            execute_nornir_task, 
+            job_payload.get("task"), 
+            job_payload.get("netbox_filters", {}), 
+            job_payload.get("extra_vars", {}), 
+            job_payload.get("job_id"),
+            job_payload.get("project_id", "Fluxara")
         )
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2: sys.exit("[CRITICAL] Missing target endpoint string channel argument parameter mapping.")
-    asyncio.run(start_worker_loop(sys.argv))
+    if len(sys.argv) < 2: 
+        sys.exit("[CRITICAL] Missing target endpoint string channel argument parameter mapping.")
+    # Read endpoint flag array on execution init
+    target_endpoint = sys.argv[1]
+    asyncio.run(start_worker_loop(target_endpoint))
