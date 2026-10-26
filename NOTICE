@@ -10,6 +10,10 @@ open-source components in accordance with their respective licenses:
   Copyright (c) 2018 David Barroso
   Licensed under the Apache License 2.0
 
+* nornir-netbox (NetBox Inventory Plugin for Nornir)
+  Copyright (c) 2020-2026 nornir-automation authors
+  Licensed under the Apache License 2.0
+
 * hvac (HashiCorp Vault API Client for Python)
   Copyright (c) 2015-2026 Ian Unruh and contributors
   Licensed under the Apache License 2.0
