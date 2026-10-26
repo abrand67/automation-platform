@@ -1,0 +1,6 @@
+# Juniper Junos Core Template Configuration Block
+set system services ssh root-login allow
+{% if ntp_server %}
+set system ntp server {{ ntp_server }} prefer
+{% endif %}
+set interfaces ge-0/0/0 description "Fluxara Backbone Core Uplink"
