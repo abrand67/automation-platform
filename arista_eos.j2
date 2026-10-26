@@ -1,0 +1,7 @@
+# Arista EOS Core Template Configuration Block
+transceiver qsfp default-mode 4x10G
+{% if ntp_server %}
+ntp server {{ ntp_server }}
+{% endif %}
+management api http-commands
+   no shutdown
