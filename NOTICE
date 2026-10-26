@@ -18,6 +18,26 @@ open-source components in accordance with their respective licenses:
   Copyright (c) 2015-2026 Ian Unruh and contributors
   Licensed under the Apache License 2.0
 
+* Pydantic Data Validation
+  Copyright (c) 2014-2026 Samuel Colvin and contributors
+  Licensed under the MIT License
+
+* python-jose (JOSE Web Token Library for Python)
+  Copyright (c) 2015-2026 Richard Lezuermann and contributors
+  Licensed under the MIT License
+
+* passlib (Password Hashing Framework)
+  Copyright (c) 2008-2026 Daniel Holth and contributors
+  Licensed under the BSD 3-Clause License
+
+* ldap3 (LDAP Client Library for Python)
+  Copyright (c) 2013-2026 Giovanni Cannata
+  Licensed under the LGPL v3 License
+
+* pyradius (RADIUS Authentication Client)
+  Copyright (c) 2013-2026 Stuart Maclean
+  Licensed under the MIT License
+
 * Netmiko Connection Library
   Copyright (c) 2014 Kirk Byers
   Licensed under the MIT License
