@@ -1,0 +1,21 @@
+{
+  "listeners": {
+    "*:8000": {
+      "pass": "applications/fastapi_app"
+    }
+  },
+  "applications": {
+    "fastapi_app": {
+      "type": "asgi",
+      "path": "/opt/Fluxara/app/",
+      "home": "/opt/Fluxara/venv/",
+      "module": "main",
+      "callable": "app",
+      "processes": {
+        "max": 10,
+        "min": 2,
+        "idle_timeout": 30
+      }
+    }
+  }
+}
