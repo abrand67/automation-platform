@@ -1,0 +1,8 @@
+# Cisco IOS / XE Core Template Configuration Block
+system mtu routing 1500
+{% if ntp_server %}
+ntp server {{ ntp_server }} prefer
+{% endif %}
+interface GigabitEthernet1
+ description Managed dynamically by Fluxara Pipeline Engine
+ no shutdown
