@@ -1,0 +1,5 @@
+# Palo Alto PAN-OS Core Template Configuration Block
+set deviceconfig system hostname {{ host.name }}
+{% if ntp_server %}
+set deviceconfig system ntp-servers primary ntp-server {{ ntp_server }}
+{% endif %}
