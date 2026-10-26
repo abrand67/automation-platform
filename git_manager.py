@@ -13,24 +13,44 @@
 # limitations under the License.
 
 import os
+from dotenv import load_dotenv
+
+# Ingest environmental configurations before downstream evaluation
+load_dotenv()
+
 import subprocess
 
-WORKSPACE_ROOT = "/opt/Fluxara/workspaces"
+# Dedicated local path context folder tracking your 'Fluxara' GitLab repository root
+WORKSPACE_ROOT = os.getenv("WORKSPACE_ROOT", "/opt/Fluxara/workspaces")
+PROJECT_DIR = os.path.join(WORKSPACE_ROOT, "Fluxara")
 
 def sync_gitlab_project(project_id: str, repo_url: str, branch: str = "main", token: str = None):
+    """
+    Clones or pulls your production GitLab repository named 'Fluxara' into an 
+    isolated local tracking folder on the application server.
+    """
+    global PROJECT_DIR
+    
+    # Inject GitLab Personal Access Token securely for private repository authentications
     if token and "gitlab.com" in repo_url and "@" not in repo_url:
         repo_url = repo_url.replace("https://", f"https://oauth2:{token}@")
-    project_dir = os.path.join(WORKSPACE_ROOT, f"project_{project_id}")
+
     os.makedirs(WORKSPACE_ROOT, exist_ok=True)
 
-    if not os.path.exists(project_dir):
-        cmd = ["git", "clone", "-b", branch, repo_url, project_dir]
+    if not os.path.exists(PROJECT_DIR):
+        # Perform initial clean repository isolation clone directly into the Fluxara folder
+        cmd = ["git", "clone", "-b", branch, repo_url, PROJECT_DIR]
         result = subprocess.run(cmd, capture_output=True, text=True)
-        if result.returncode != 0: raise Exception(f"Git Clone Failure: {result.stderr}")
+        if result.returncode != 0: 
+            raise Exception(f"Fluxara Git Clone Failure: {result.stderr}")
     else:
-        cmd_fetch = ["git", "-C", project_dir, "fetch", "--all"]
-        cmd_reset = ["git", "-C", project_dir, "reset", "--hard", f"origin/{branch}"]
+        # Repository exists; execute an atomic fetch and hard reset to match production branch head
+        cmd_fetch = ["git", "-C", PROJECT_DIR, "fetch", "--all"]
+        cmd_reset = ["git", "-C", PROJECT_DIR, "reset", "--hard", f"origin/{branch}"]
+        
         subprocess.run(cmd_fetch, capture_output=True)
         result = subprocess.run(cmd_reset, capture_output=True, text=True)
-        if result.returncode != 0: raise Exception(f"Git Pull Reset Failure: {result.stderr}")
-    return project_dir
+        if result.returncode != 0: 
+            raise Exception(f"Fluxara Git Pull Reset Failure: {result.stderr}")
+            
+    return PROJECT_DIR
