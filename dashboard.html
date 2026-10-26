@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fluxara Console Engine</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="/static/htmx.min.js"></script>
+    <script src="/static/ws.js"></script>
+</head>
+<body>
+    <div class="console-container">
+        <header style="border-bottom: 1px solid var(--border-color); padding-bottom: 1.5rem; margin-bottom: 2rem;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem;">
+                <div>
+                    <h1 style="color: var(--emerald-green); margin: 0; font-size: 1.75rem; font-family: monospace; font-weight: bold;">Fluxara // Nornir Engine</h1>
+                    <p style="color: var(--text-muted); font-size: 0.875rem; margin: 0.35rem 0 0 0;">Job Tracker: <span style="font-family: monospace; color: var(--text-main);">{{ job_id }}</span></p>
+                </div>
+                <div><a href="/logout" style="font-family: monospace; font-size: 0.75rem; color: var(--rose-red); text-decoration: none; border: 1px solid var(--rose-red); padding: 0.5rem 0.75rem; border-radius: 4px; font-weight: 600;">[Terminate Session]</a></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; background-color: rgba(0,0,0,0.3); padding: 0.75rem 1rem; border-radius: 6px; border: 1px solid #1e293b;">
+                <nav style="display: flex; gap: 1.25rem; font-family: monospace; font-size: 0.85rem;">
+                    <a href="#" hx-get="/scheduler" hx-target="#main-content-viewport" hx-swap="outerHTML" style="color: var(--text-main); text-decoration: none; font-weight: 600;">[Schedules]</a>
+                    <a href="#" hx-get="/inventories" hx-target="#main-content-viewport" hx-swap="outerHTML" style="color: var(--text-muted); text-decoration: none;">[Inventories]</a>
+                    <a href="#" hx-get="/projects"    hx-target="#main-content-viewport" hx-swap="outerHTML" style="color: var(--text-muted); text-decoration: none;">[Projects]</a>
+                </nav>
+                <div style="display: flex; gap: 1rem; font-family: monospace; font-size: 0.7rem;">
+                    <div style="display: flex; align-items: center; gap: 0.4rem; background-color: #000; padding: 0.35rem 0.6rem; border-radius: 4px; border: 1px solid var(--border-color);"><span style="color: var(--text-muted);">ZMQ EDGE:</span><span style="color: var(--emerald-green); font-weight: bold;">ONLINE</span></div>
+                    <div style="display: flex; align-items: center; gap: 0.4rem; background-color: #000; padding: 0.35rem 0.6rem; border-radius: 4px; border: 1px solid var(--border-color);"><span style="color: var(--text-muted);">VALKEY:</span><span style="color: var(--emerald-green); font-weight: bold;">CONNECTED</span></div>
+                </div>
+            </div>
+        </header>
+        <main>
+            <section>
+                <div class="terminal-header"><span>SECURE STDOUT STREAMING CONSOLE</span><div class="status-pulse"></div></div>
+                <div id="websocket-wrapper"><div style="color: var(--text-muted); font-style: italic; font-family: monospace; font-size: 0.85rem;">[System] Resolving token bounds...</div></div>
+            </section>
+            <div id="main-content-viewport" hx-get="/scheduler" hx-trigger="load" hx-swap="outerHTML">
+                <div style="color: var(--text-muted); font-family: monospace; font-size: 0.75rem; padding: 2rem 0; text-align: center; font-style: italic;">Loading operational modules...</div>
+            </div>
+        </main>
+    </div>
+    <script>
+        document.body.addEventListener('htmx:oobAfterSwap', function(e) { const box = document.getElementById("terminal-log-output"); if (box) { box.scrollTop = box.scrollHeight; } });
+        document.addEventListener("DOMContentLoaded", function() {
+            const token = localStorage.getItem("nornir_access_token") || "guest";
+            const target = document.getElementById("websocket-wrapper");
+            if (target) {
+                target.setAttribute("hx-ext", "ws"); target.setAttribute("ws-connect", `/ws/v1/jobs/{{ job_id }}/logs?token=${encodeURIComponent(token)}`);
+                target.innerHTML = `<div id="terminal-log-output"><div style="color: var(--text-muted); font-style: italic;">[System] Connecting socket streams...</div></div>`;
+                htmx.process(target);
+            }
+        });
+    </script>
+</body>
+</html>
