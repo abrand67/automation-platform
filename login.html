@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Fluxara Platform - Login Gateway</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .login-viewport { display: flex; justify-content: center; align-items: center; min-height: 80vh; }
+        .login-card { width: 100%; max-width: 400px; background-color: var(--bg-black); border: 1px solid var(--border-color); border-radius: 8px; padding: 2.5rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7); }
+        .form-group { margin-bottom: 1.25rem; }
+        .error-banner { display: none; background-color: rgba(244, 63, 94, 0.1); border: 1px solid var(--rose-red); color: var(--rose-red); font-family: monospace; font-size: 0.75rem; padding: 0.75rem; border-radius: 4px; margin-bottom: 1.25rem; }
+    </style>
+</head>
+<body>
+    <div class="login-viewport">
+        <div class="login-card">
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <h1 style="color: var(--emerald-green); font-size: 1.25rem; font-weight: bold; font-family: monospace; margin: 0;">// SECURITY GATEWAY</h1>
+                <p style="color: var(--text-muted); font-size: 0.75rem; margin-top: 0.25rem;">Fluxara Enterprise Network Engine</p>
+            </div>
+            <div id="auth-error" class="error-banner"></div>
+            <form id="login-form">
+                <div class="form-group input-group"><label>ENTERPRISE USERNAME</label><input type="text" id="username" name="username" required autofocus class="input-control" placeholder="net_admin"></div>
+                <div class="form-group input-group"><label>DIRECTORY PASSWORD</label><input type="password" id="password" name="password" required class="input-control" placeholder="••••••••••••"></div>
+                <div style="margin-top: 2rem;"><button type="submit" id="submit-btn" class="btn-submit" style="width: 100%; height: 40px;">Clearance Authentication</button></div>
+            </form>
+        </div>
+    </div>
+    <script>
+        document.getElementById("login-form").addEventListener("submit", async function(e) {
+            e.preventDefault();
+            const err = document.getElementById("auth-error"), btn = document.getElementById("submit-btn");
+            err.style.display = "none"; btn.innerText = "Verifying..."; btn.disabled = true;
+            const form = new URLSearchParams();
+            form.append("username", document.getElementById("username").value);
+            form.append("password", document.getElementById("password").value);
+            try {
+                const res = await fetch("/api/v1/auth/token", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: form });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || "Credentials rejected.");
+                localStorage.setItem("nornir_access_token", data.access_token);
+                window.location.href = "/scheduler";
+            } catch (err_msg) {
+                err.innerText = `[FAIL] ${err_msg.message}`; err.style.display = "block";
+                btn.innerText = "Clearance Authentication"; btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
