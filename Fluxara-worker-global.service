@@ -1,0 +1,21 @@
+[Unit]
+Description=Long-Running ZeroMQ Shard Worker - Fluxara Global Fabric
+After=network.target valkey.service
+Wants=valkey.service
+
+[Service]
+Type=simple
+User=automation
+Group=automation
+WorkingDirectory=/opt/Fluxara/app
+# Loads the identical centralized environment file variables into memory
+EnvironmentFile=/opt/Fluxara/app/.env
+# Directs the singular worker to capture tasks from the fallback global queue
+ExecStart=/opt/Fluxara/venv/bin/python nornir_zmq_worker.py tcp://127.0.0.1:5557
+Restart=always
+RestartSec=3
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
