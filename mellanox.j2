@@ -1,0 +1,6 @@
+# NVIDIA Mellanox Onyx OS Template
+protocol lldp
+{% if ntp_server %}
+ntp server {{ ntp_server }}
+{% endif %}
+interface ethernet 1/1 description "Fluxara-To-Mellanox-Interconnect"
