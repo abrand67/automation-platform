@@ -1,0 +1,6 @@
+# Standard Linux Shell Command Execution Script
+# Replaces CLI commands with direct POSIX shell syntax instructions
+sudo systemctl restart snmpd
+{% if dns_primary %}
+echo "nameserver {{ dns_primary }}" | sudo tee /etc/resolv.conf
+{% endif %}
