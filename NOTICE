@@ -42,6 +42,10 @@ open-source components in accordance with their respective licenses:
   Copyright (c) 2014 Kirk Byers
   Licensed under the MIT License
 
+* Netmiko / Scrapli Vendor Multi-Driver Extensions
+  Copyright (c) 2014-2026 Kirk Byers, Carl Montanari
+  Licensed under the MIT License
+
 * FastAPI Web Framework
   Copyright (c) 2018 Sebastián Ramírez
   Licensed under the MIT License
