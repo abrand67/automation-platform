@@ -1,0 +1,9 @@
+# Cisco Nexus NX-OS Configuration Template
+feature nxapi
+feature lldp
+{% if ntp_server %}
+ntp server {{ ntp_server }} use-vrf management
+{% endif %}
+interface Ethernet1/1
+  description Backbone-Fabric-Uplink
+  no shutdown
