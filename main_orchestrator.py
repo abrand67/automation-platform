@@ -22,12 +22,16 @@ def run_multi_vendor_deployment(task, extra_vars, job_id, stream_callback):
     Core execution logic called per-host by Nornir's ThreadedRunner.
     Maps platform attributes, renders local Jinja2 templates, and deploys configs.
     """
+    # Expanded Platform Driver Map containing your new infrastructure profiles
     platform_driver_map = {
         "arista-eos": "arista_eos",
         "cisco-ios-xe": "cisco_ios",
-        "cisco-nx-os": "cisco_nxos",
+        "cisco-nx-os": "cisco_nxos",          # Supported natively via netmiko
         "juniper-junos": "juniper_junos",
-        "paloalto-panos": "paloalto_panos"
+        "paloalto-panos": "paloalto_panos",
+        "linux-server": "linux",              # Native Linux shell prompt driver
+        "nvidia-mellanox": "mellanox",        # NVIDIA/Mellanox Onyx/Onyx-OS
+        "cumulus-linux": "cumulus_linux"      # Cumulus VX / Linux (FRRouting/Debian)
     }
     
     netbox_slug = task.host.platform
@@ -84,8 +88,9 @@ def run_multi_vendor_deployment(task, extra_vars, job_id, stream_callback):
             config_commands=config_commands_list
         )
         
-        if target_driver in ["juniper_junos", "paloalto_panos"]:
-            stream_callback(task.host.name, "Applying pending changes via explicit 'commit' operation...")
+        # Explicit commits required for Juniper, Palo Alto, and NVIDIA Onyx structures
+        if target_driver in ["juniper_junos", "paloalto_panos", "mellanox"]:
+            stream_callback(task.host.name, "Applying pending changes via explicit 'commit' configuration save...")
             task.run(task=netmiko_send_command, command_string="commit")
 
         stream_loop_lines = config_result.result.splitlines()
