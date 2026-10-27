@@ -1,0 +1,6 @@
+# Cumulus Network Linux NVUE / FRRouting Configuration Block
+net add interface swp1 description "Uplink-To-Spine-Fabric"
+{% if dns_primary %}
+net add dns nameserver {{ dns_primary }}
+{% endif %}
+net pending commit
