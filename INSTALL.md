@@ -34,8 +34,8 @@ sudo mkdir -p /opt/Fluxara/workspaces
 sudo useradd -r -s /bin/false automation || true
 ```
 
-### Step 2: Configure Environment Parameters
-Create your environment variables configuration file inside `/opt/Fluxara/app/.env` matching your infrastructure parameters:
+### Step 2: Configure Centralized Environment Profiles
+Create your environment variables configuration file inside `/opt/Fluxara/app/.env` matching your enterprise data infrastructure parameters:
 ```ini
 DATABASE_URL=postgresql+asyncpg://nornir_admin:Pass123!@127.0.0.1:5432/nornir_db
 VALKEY_HOST=127.0.0.1
@@ -47,19 +47,25 @@ VAULT_TOKEN=your_static_worker_vault_token
 ```
 
 ### Step 3: Run the Automation Deployment Script
-Make the native install/copy script executable and run it via root context to automate environment generation:
+Make the native install/copy script executable and run it via root context to automate environment generation, script compilation, and systemd daemon initialization blocks:
 ```bash
 sudo chmod +x ./install.sh
 sudo ./install.sh
 ```
 
-### Step 4: Populate the Root Administrative Account
-Run the secure application database seed script using your environment path to add an initial administrator account to your Percona PostgreSQL engine instance:
-```bash
-cd /opt/Fluxara/app
-sudo -u automation /opt/Fluxara/venv/bin/python seed_admin.py net_admin VaultSecuredPassword123!
-```
+### Step 4: Initialize Schemas & Apply Role-Based Access Control Seeds
+Execute the comprehensive DDL and DML data initializations directly within your Percona PostgreSQL shell to establish application boundaries:
 
+```bash
+# 1. Pipe the layout definitions to generate your tables, associations, and search indexes
+psql -U nornir_admin -d nornir_db -f /opt/Fluxara/app/initialize_schema.sql
+
+# 2. Bootstrap your root database system administrator user profile
+sudo -u automation /opt/Fluxara/venv/bin/python /opt/Fluxara/app/seed_admin.py net_admin VaultSecuredPassword123!
+
+# 3. Apply your corporate permission tiers, wildcard tokens, and link your admin profile
+psql -U nornir_admin -d nornir_db -f /opt/Fluxara/app/seed_rbac_records.sql
+```
 ---
 
 ## 🔍 System Verification & Log Verification
